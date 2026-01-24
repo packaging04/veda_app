@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from "react-dom";
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -15,7 +16,12 @@ interface ToastContainerProps {
 }
 
 const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, removeToast }) => {
-  return (
+  if (typeof window === "undefined") return null;
+
+  const portalRoot = document.getElementById("toast-root");
+  if (!portalRoot) return null;
+
+  return createPortal(
     <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
       {toasts.map((toast) => (
         <ToastNotification
@@ -24,7 +30,8 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, removeToast }) 
           onClose={() => removeToast(toast.id)}
         />
       ))}
-    </div>
+    </div>,
+    portalRoot
   );
 };
 
