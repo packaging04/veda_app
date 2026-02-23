@@ -25,7 +25,8 @@ interface ScheduleCallModalProps {
 const VEDA_PHONE_NUMBER = "+234 201 700 6363";
 
 function generateCallCode(userId: string): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  // Unambiguous chars — no 0/O, 1/I/L confusion, easy to say over the phone
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
   const hash = userId.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
   let code = "";
   let seed = hash + Date.now();
@@ -33,7 +34,8 @@ function generateCallCode(userId: string): string {
     code += chars[seed % chars.length];
     seed = Math.floor(seed / 2) + (seed % 3) * 7 + i * 13;
   }
-  return `VDA-${code.slice(0, 3)}-${code.slice(3)}`;
+  // Return plain 6-char code — easier to read out than VDA-XXX-XXX
+  return code;
 }
 
 const TIME_OPTIONS = [

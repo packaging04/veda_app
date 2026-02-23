@@ -145,6 +145,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, sectionRefs }) => {
     undefined,
   );
   const [showDemo, setShowDemo] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   // ─── Auth listener ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -237,11 +238,25 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, sectionRefs }) => {
   // ─── Dashboard view ─────────────────────────────────────────────────────────
   if (view === "dashboard" && user) {
     return (
-      <Dashboard
-        user={user}
-        onLogout={handleLogout}
-        onBack={() => setView("landing")}
-      />
+      <>
+        <Dashboard
+          user={user}
+          onLogout={handleLogout}
+          onBack={() => setView("landing")}
+          onUpgrade={() => setShowUpgrade(true)}
+        />
+        {showUpgrade && (
+          <AuthModal
+            isOpen={showUpgrade}
+            initialMode="upgrade"
+            onClose={() => setShowUpgrade(false)}
+            onSuccess={(updatedUser) => {
+              setUser(updatedUser);
+              setShowUpgrade(false);
+            }}
+          />
+        )}
+      </>
     );
   }
 

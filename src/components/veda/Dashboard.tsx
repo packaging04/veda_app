@@ -9,11 +9,17 @@ interface DashboardProps {
   user: any;
   onLogout: () => void;
   onBack: () => void;
+  onUpgrade?: () => void;
 }
 
 const VEDA_PHONE_NUMBER = "+234 201 700 6363";
 
-const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onBack }) => {
+const Dashboard: React.FC<DashboardProps> = ({
+  user,
+  onLogout,
+  onBack,
+  onUpgrade,
+}) => {
   const [profile, setProfile] = useState<any>(null);
   const [schedules, setSchedules] = useState<any[]>([]);
   const [recordings, setRecordings] = useState<any[]>([]);
@@ -224,7 +230,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onBack }) => {
                 real wisdom sessions with your personal call code.
               </p>
             </div>
-            <button className="flex-shrink-0 px-4 py-2 bg-[#d4af37] text-[#1a2332] font-bold rounded-xl text-sm hover:bg-[#e5c55a] transition-colors">
+            <button
+              onClick={onUpgrade}
+              className="flex-shrink-0 px-4 py-2 bg-[#d4af37] text-[#1a2332] font-bold rounded-xl text-sm hover:bg-[#e5c55a] transition-colors"
+            >
               Upgrade Plan
             </button>
           </div>
@@ -317,7 +326,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout, onBack }) => {
                       )}
                     </div>
                     {profile?.subscription_plan !== "premium" && (
-                      <button className="w-full py-2 text-xs font-bold text-[#d4af37] border border-[#d4af37]/30 rounded-xl hover:bg-[#d4af37]/10 transition-colors">
+                      <button
+                        onClick={onUpgrade}
+                        className="w-full py-2 text-xs font-bold text-[#d4af37] border border-[#d4af37]/30 rounded-xl hover:bg-[#d4af37]/10 transition-colors"
+                      >
                         Upgrade Plan ↗
                       </button>
                     )}
