@@ -22,20 +22,13 @@ interface ScheduleCallModalProps {
   onError: (msg: string) => void;
 }
 
-const VEDA_PHONE_NUMBER = "+2342017001158";
+const VEDA_PHONE_NUMBER = "+234 201 700 6363";
 
-function generateCallCode(userId: string): string {
-  // Unambiguous chars — no 0/O, 1/I/L confusion, easy to say over the phone
-  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-  const hash = userId.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-  let code = "";
-  let seed = hash + Date.now();
-  for (let i = 0; i < 6; i++) {
-    code += chars[seed % chars.length];
-    seed = Math.floor(seed / 2) + (seed % 3) * 7 + i * 13;
-  }
-  // Return plain 6-char code — easier to read out than VDA-XXX-XXX
-  return code;
+function generateCallCode(): string {
+  // 6-digit numeric PIN — entered on keypad via <GetDigits>, never spoken.
+  // Range 100000–999999 so the leading digit is never zero.
+  const pin = Math.floor(Math.random() * 900000) + 100000;
+  return String(pin);
 }
 
 const TIME_OPTIONS = [
@@ -172,7 +165,7 @@ const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
     if (!validate()) return;
     setLoading(true);
     try {
-      const callCode = generateCallCode(userId);
+      const callCode = generateCallCode();
       const inserts = sessions.map((s) => ({
         user_id: userId,
         call_code: callCode,
@@ -210,7 +203,7 @@ const ScheduleCallModal: React.FC<ScheduleCallModalProps> = ({
       });
     } catch (err: any) {
       // For demo: still show success even if DB fails
-      const callCode = generateCallCode(userId);
+      const callCode = generateCallCode();
       onSuccess({
         callCode,
         phoneNumber: VEDA_PHONE_NUMBER,
