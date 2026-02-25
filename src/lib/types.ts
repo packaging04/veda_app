@@ -110,7 +110,7 @@ export interface CallerProfile {
 export interface ScheduledCall {
   id: string;
   user_id: string;
-  caller_profile_id?: string | null; // null = self
+  caller_profile_id?: string | null;
   caller_name: string;
   scheduled_date: string;
   time_start: string;
@@ -145,3 +145,8 @@ export interface LovedOne {
   notes?: string;
   created_at: string;
 }
+
+// ── Aliases ───────────────────────────────────────────────────────────────────
+// supabase.ts imports these names — they map to the canonical interfaces above
+export type Profile = UserProfile;
+export type Recording = CallRecording;

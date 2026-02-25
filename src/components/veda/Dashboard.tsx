@@ -12,7 +12,7 @@ interface DashboardProps {
   onUpgrade?: () => void;
 }
 
-const VEDA_PHONE_NUMBER = "+234 201 700 6363";
+const VEDA_PHONE_NUMBER = "+2342017001158";
 
 const Dashboard: React.FC<DashboardProps> = ({
   user,
@@ -695,7 +695,7 @@ const SessionCard: React.FC<{ session: any }> = ({ session }) => (
           Dial this number during your window
         </p>
         <p className="font-mono font-bold text-[#1a2332]">
-          {session.phone_number || "+234 201 700 6363"}
+          {session.phone_number || "+2342017001158"}
         </p>
       </div>
       <div className="text-right">

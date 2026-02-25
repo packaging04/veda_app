@@ -22,7 +22,7 @@ interface ScheduleCallModalProps {
   onError: (msg: string) => void;
 }
 
-const VEDA_PHONE_NUMBER = "+234 201 700 6363";
+const VEDA_PHONE_NUMBER = "+2342017001158";
 
 function generateCallCode(userId: string): string {
   // Unambiguous chars — no 0/O, 1/I/L confusion, easy to say over the phone
