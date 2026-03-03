@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import Imagg from "../../public/veda_logo.png"
 
 // ─── Social Media Links (update URLs when ready) ──────────────────────────────
 const SOCIAL = {
@@ -458,7 +459,12 @@ const WaitlistPopup = ({ onClose, t }) => {
                   marginBottom: 18,
                 }}
               >
-                <VedaLogo size={28} color={t.gold} />
+                {/* <VedaLogo size={28} color={t.gold} /> */}
+                <img
+                  src={Imagg}
+                  alt="Veda Logo"
+                  className="w-8 h-8 pointer-events-none cursor-pointer"
+                />
                 <span
                   className="vl-serif"
                   style={{
@@ -1031,7 +1037,12 @@ export default function VedaLandingPage() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <VedaLogo size={24} color={t.gold} />
+            {/* <VedaLogo size={24} color={t.gold} /> */}
+            <img
+              src={Imagg}
+              alt="Veda Logo"
+              className="w-12 h-12 pointer-events-none cursor-pointer"
+            />
             <span
               className="vl-serif"
               style={{
@@ -1958,7 +1969,12 @@ export default function VedaLandingPage() {
                     marginBottom: 14,
                   }}
                 >
-                  <VedaLogo size={22} color={t.gold} />
+                  {/* <VedaLogo size={22} color={t.gold} /> */}
+                  <img
+                    src={Imagg}
+                    alt="Veda Logo"
+                    className="w-12 h-12 pointer-events-none cursor-pointer"
+                  />
                   <span
                     className="vl-serif"
                     style={{
