@@ -1983,13 +1983,13 @@ export default function VedaLandingPage() {
                   judgment across generations — for families, founders, and
                   elders.
                 </p>
-                <p style={{ fontSize: 12, color: t.textDim, marginBottom: 4 }}>
+                {/* <p style={{ fontSize: 12, color: t.textDim, marginBottom: 4 }}>
                   Founded by{" "}
                   <strong style={{ color: t.textMuted }}>Adeyemi Olaoye</strong>
                 </p>
                 <p style={{ fontSize: 12, color: t.textDim }}>
                   Incorporated in Nigeria · Expanding globally
-                </p>
+                </p> */}
               </div>
 
               {/* Social links */}
