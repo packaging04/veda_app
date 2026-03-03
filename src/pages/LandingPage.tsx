@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 // ─── Social Media Links (update URLs when ready) ──────────────────────────────
@@ -11,11 +11,11 @@ const SOCIAL = {
 
 // ─── Hero slides ──────────────────────────────────────────────────────────────
 const HERO_SLIDES = [
-  "https://images.unsplash.com/photo-1516307365426-bea591f05011?w=1800&q=80",
-  "https://images.unsplash.com/photo-1573497491208-6b1acb260507?w=1800&q=80",
-  "https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?w=1800&q=80",
-  "https://images.unsplash.com/photo-1559526324-593bc073d938?w=1800&q=80",
-  "https://images.unsplash.com/photo-1609207888681-14ebac3c6e06?w=1800&q=80",
+  "https://i.postimg.cc/y8CGWNMT/an-elderly-african-woman-in-her-70s-sitt-Pf-Zfk-CKRSIi-Ngo-BXjw79t-Q-FRnp1IKx-QEy-Ub-X6pz-VSl-Bg-sd.jpg",
+  "https://i.postimg.cc/qBnSrnFD/s-Mr-Piwf0S5CH0m-Oe-T7RJcg-2k.webp",
+  "https://i.postimg.cc/T1G9fyLp/an-elderly-african-grandfather-sitting-u-o-Ko-Dl9b-JRp-O4Oz-Ncy-Mpx-Zg-Ttm-Nel1IRV2Sjn-EDi6tn2w-sd.jpg",
+  "https://i.postimg.cc/6QfqFyXV/a-multigenerational-african-family-grand-co6x-EHc-HR5Ck-FQ17VPBi-Eg-z4V9L6VTQx6n-NV5En-Cnapg-sd.jpg",
+  "https://i.postimg.cc/wjH72XKv/an-adult-african-woman-in-her-40s-sittin-t-A4hxayp-S8GHUvnv-SG7wz-A-1z-L9n2p-ORZm-Blfeg-Ngftsw-sd.jpg",
 ];
 
 // ─── Hero text slides ─────────────────────────────────────────────────────────
@@ -992,7 +992,7 @@ export default function VedaLandingPage() {
     const id = setInterval(() => {
       setSlide((p) => (p + 1) % HERO_SLIDES.length);
       setTextKey((p) => p + 1);
-    }, 5000);
+    }, 7000);
     return () => clearInterval(id);
   }, []);
 
