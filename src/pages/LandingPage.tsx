@@ -1358,7 +1358,7 @@ export default function VedaLandingPage() {
               <div style={{ height: 1, width: 44, background: G(t.gold) }} />
               <span
                 style={{
-                  fontSize: 11,
+                  fontSize: 24,
                   fontWeight: 600,
                   letterSpacing: "0.2em",
                   color: t.gold,
@@ -1511,7 +1511,7 @@ export default function VedaLandingPage() {
                 <div style={{ height: 1, width: 40, background: G(t.gold) }} />
                 <span
                   style={{
-                    fontSize: 11,
+                    fontSize: 24,
                     fontWeight: 600,
                     letterSpacing: "0.2em",
                     color: t.gold,
@@ -1655,7 +1655,7 @@ export default function VedaLandingPage() {
                 <div style={{ height: 1, width: 40, background: G(t.gold) }} />
                 <span
                   style={{
-                    fontSize: 11,
+                    fontSize: 24,
                     fontWeight: 600,
                     letterSpacing: "0.2em",
                     color: t.gold,
@@ -1769,7 +1769,7 @@ export default function VedaLandingPage() {
               <div style={{ height: 1, width: 40, background: G(t.gold) }} />
               <span
                 style={{
-                  fontSize: 11,
+                  fontSize: 24,
                   fontWeight: 600,
                   letterSpacing: "0.2em",
                   color: t.gold,
