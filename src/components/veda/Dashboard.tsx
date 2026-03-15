@@ -299,7 +299,9 @@ const Dashboard: React.FC<DashboardProps> = ({
                       <div>
                         <p className="font-semibold text-amber-900 text-sm">
                           {pastScheduledCalls.length} session window
-                          {pastScheduledCalls.length > 1 ? "s have" : " has"}{" "}
+                          {pastScheduledCalls.length > 1
+                            ? "s have"
+                            : " has"}{" "}
                           elapsed
                         </p>
                         <p className="text-xs text-amber-700 mt-0.5">
@@ -761,35 +763,50 @@ const EmptyState: React.FC<{
 
 const RecordingCard: React.FC<{ rec: any }> = ({ rec }) => {
   const [playing, setPlaying] = React.useState(false);
+  const [progress, setProgress] = React.useState(0);
   const [audioError, setAudioError] = React.useState(false);
-  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  const audioRef = React.useRef<HTMLAudioElement>(null);
 
   const duration = rec.duration_seconds
     ? `${Math.floor(rec.duration_seconds / 60)}:${String(rec.duration_seconds % 60).padStart(2, "0")}`
     : null;
 
   const handlePlay = () => {
-    if (!rec.recording_url) return;
-    if (!audioRef.current) {
-      const audio = new Audio(rec.recording_url);
-      audio.onended = () => setPlaying(false);
-      audio.onerror = () => {
-        setAudioError(true);
-        setPlaying(false);
-      };
-      audioRef.current = audio;
-    }
+    const audio = audioRef.current;
+    if (!audio) return;
     if (playing) {
-      audioRef.current.pause();
-      setPlaying(false);
+      audio.pause();
     } else {
-      audioRef.current.play().catch(() => setAudioError(true));
-      setPlaying(true);
+      audio.play().catch(() => setAudioError(true));
     }
   };
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* Hidden real <audio> element — no download, browser handles CORS */}
+      {rec.recording_url && (
+        <audio
+          ref={audioRef}
+          src={rec.recording_url}
+          preload="metadata"
+          controlsList="nodownload"
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onEnded={() => {
+            setPlaying(false);
+            setProgress(0);
+          }}
+          onError={() => setAudioError(true)}
+          onTimeUpdate={() => {
+            const audio = audioRef.current;
+            if (audio && audio.duration) {
+              setProgress((audio.currentTime / audio.duration) * 100);
+            }
+          }}
+          style={{ display: "none" }}
+        />
+      )}
+
       {/* Header */}
       <div className="p-5">
         <div className="flex items-start justify-between gap-4">
@@ -860,15 +877,27 @@ const RecordingCard: React.FC<{ rec: any }> = ({ rec }) => {
                 </svg>
               )}
             </button>
-            <div className="flex-1 min-w-0">
-              <div className="h-1 bg-white/10 rounded-full">
+            <div
+              className="flex-1 min-w-0 cursor-pointer"
+              onClick={(e) => {
+                const audio = audioRef.current;
+                if (!audio || !audio.duration) return;
+                const rect = (
+                  e.currentTarget as HTMLElement
+                ).getBoundingClientRect();
+                const pct = (e.clientX - rect.left) / rect.width;
+                audio.currentTime = pct * audio.duration;
+              }}
+            >
+              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                 <div
-                  className={`h-full bg-[#d4af37] rounded-full transition-all ${playing ? "w-1/3 animate-pulse" : "w-0"}`}
+                  className="h-full bg-[#d4af37] rounded-full transition-all duration-100"
+                  style={{ width: `${progress}%` }}
                 />
               </div>
             </div>
-            <span className="text-xs text-white/40 flex-shrink-0">
-              {playing ? "Playing..." : duration || "Play"}
+            <span className="text-xs text-white/40 flex-shrink-0 w-12 text-right">
+              {playing ? "●" : duration || "Play"}
             </span>
           </div>
         ) : (
