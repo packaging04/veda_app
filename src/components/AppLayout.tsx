@@ -4,170 +4,53 @@ import Header from "../components/veda/Header.tsx";
 import AuthModal from "../components/veda/AuthModal.tsx";
 import Dashboard from "../components/veda/Dashboard.tsx";
 import Pricing from "../components/veda/Pricing.tsx";
+import ConsultationModal from "../components/veda/ConsultationModal.tsx";
 
-// ─── View types ────────────────────────────────────────────────────────────────
 type AppView = "landing" | "dashboard";
 
-// ─── ConsultationModal (Request a Demo) ───────────────────────────────────────
-const ConsultationModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
-  isOpen,
-  onClose,
-}) => {
-  const [submitted, setSubmitted] = useState(false);
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [message, setMessage] = useState("");
-
-  if (!isOpen) return null;
-
-  const handleSubmit = async () => {
-    if (!email || !name) return;
-    // In production: send to a form endpoint / Supabase table
-    setSubmitted(true);
-  };
-
-  return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-[#0d1520]/95 backdrop-blur-lg"
-        onClick={onClose}
-      />
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-        <div className="h-1.5 bg-gradient-to-r from-[#d4af37] via-[#e5c55a] to-[#c9a227]" />
-        <div className="p-8">
-          {!submitted ? (
-            <>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-[#d4af37]/10 rounded-xl flex items-center justify-center text-2xl">
-                  🎬
-                </div>
-                <div>
-                  <h3 className="text-xl font-serif text-[#1a2332]">
-                    Request a Demo
-                  </h3>
-                  <p className="text-sm text-[#1a2332]/50">
-                    We'll reach out to schedule a live walkthrough
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="text-xs font-bold text-[#1a2332]/60 tracking-wider block mb-1.5">
-                    FULL NAME *
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your name"
-                    className="w-full px-4 py-3 bg-[#f5f1e8] rounded-xl text-[#1a2332] text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/40"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-[#1a2332]/60 tracking-wider block mb-1.5">
-                    EMAIL *
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    className="w-full px-4 py-3 bg-[#f5f1e8] rounded-xl text-[#1a2332] text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/40"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-[#1a2332]/60 tracking-wider block mb-1.5">
-                    TELL US ABOUT YOUR INTEREST
-                  </label>
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Who would you like to preserve wisdom for?"
-                    rows={3}
-                    className="w-full px-4 py-3 bg-[#f5f1e8] rounded-xl text-[#1a2332] text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37]/40 resize-none"
-                  />
-                </div>
-              </div>
-              <button
-                onClick={handleSubmit}
-                disabled={!email || !name}
-                className="w-full py-3.5 bg-gradient-to-r from-[#d4af37] to-[#c9a227] text-[#1a2332] font-bold rounded-xl hover:from-[#e5c55a] hover:to-[#d4af37] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Request Demo →
-              </button>
-            </>
-          ) : (
-            <div className="text-center py-6">
-              <div className="text-5xl mb-4">✨</div>
-              <h3 className="text-xl font-serif text-[#1a2332] mb-2">
-                Request Received!
-              </h3>
-              <p className="text-sm text-[#1a2332]/60 mb-6">
-                Thanks, {name}! We'll be in touch at {email} shortly to schedule
-                your live demo.
-              </p>
-              <button
-                onClick={onClose}
-                className="px-6 py-2.5 bg-[#1a2332] text-[#d4af37] font-bold rounded-xl hover:bg-[#2a3342] transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          )}
-        </div>
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-xs transition-colors"
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// ─── Main AppLayout ────────────────────────────────────────────────────────────
 interface AppLayoutProps {
-  /** Pass in your existing landing page sections as children */
   children?: React.ReactNode;
-  /** Optional: sections ref map for scroll navigation */
-  sectionRefs?: Record<string, React.RefObject<HTMLElement>>;
 }
 
-const AppLayout: React.FC<AppLayoutProps> = ({ children, sectionRefs }) => {
-  const [view, setView] = useState<AppView>("landing");
+const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [user, setUser] = useState<any>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
+  const [view, setView] = useState<AppView>("landing");
 
-  // Modal states
   const [showAuth, setShowAuth] = useState(false);
-  const [authInitialPlan, setAuthInitialPlan] = useState<string | undefined>(
-    undefined,
-  );
   const [showDemo, setShowDemo] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [authInitialPlan, setAuthInitialPlan] = useState<string | undefined>();
 
-  // ─── Auth listener ──────────────────────────────────────────────────────────
+  const sectionRefs = useRef<Record<string, React.RefObject<HTMLElement>>>({});
+
+  // ── Auth init ────────────────────────────────────────────────────────────────
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
+    // Check current session (handles magic link tokens too — detectSessionInUrl: true)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      // If already logged in, go straight to dashboard
+      if (session?.user) setView("dashboard");
       setLoadingAuth(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setUser(session?.user ?? null);
+        const newUser = session?.user ?? null;
+        setUser(newUser);
+        // Magic link sign-in: auto-redirect to dashboard
+        if (newUser && _event === "SIGNED_IN") setView("dashboard");
+        if (_event === "SIGNED_OUT") setView("landing");
       },
     );
 
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  // ─── Navigation ─────────────────────────────────────────────────────────────
+  // ── Navigation ───────────────────────────────────────────────────────────────
   const handleNavigate = (section: string) => {
     if (view === "dashboard") {
       setView("landing");
-      // slight delay to let landing render before scrolling
       setTimeout(() => scrollToSection(section), 100);
     } else {
       scrollToSection(section);
@@ -175,31 +58,32 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, sectionRefs }) => {
   };
 
   const scrollToSection = (section: string) => {
-    if (sectionRefs?.[section]?.current) {
-      sectionRefs[section].current?.scrollIntoView({ behavior: "smooth" });
+    if (sectionRefs.current?.[section]?.current) {
+      sectionRefs.current[section].current?.scrollIntoView({
+        behavior: "smooth",
+      });
       return;
     }
-    // fallback: find by id
     const el = document.getElementById(section);
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
-  // ─── Auth callbacks ─────────────────────────────────────────────────────────
+  // ── Auth callbacks ───────────────────────────────────────────────────────────
   const handleAuthSuccess = (loggedInUser: any) => {
     setUser(loggedInUser);
     setShowAuth(false);
     setView("dashboard");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     setView("landing");
   };
 
-  // ─── Plan selection from Pricing section ────────────────────────────────────
+  // ── Plan selection from Pricing section ─────────────────────────────────────
   const handleSelectPlan = (planId: string) => {
     if (user) {
-      // Already logged in — go to dashboard (could trigger upgrade flow)
       setView("dashboard");
     } else {
       setAuthInitialPlan(planId);
@@ -207,7 +91,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, sectionRefs }) => {
     }
   };
 
-  // ─── Loading screen ─────────────────────────────────────────────────────────
+  // ── Loading screen ───────────────────────────────────────────────────────────
   if (loadingAuth) {
     return (
       <div className="min-h-screen bg-[#1a2332] flex items-center justify-center">
@@ -222,12 +106,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, sectionRefs }) => {
               d="M8 12 L24 38 L40 12"
               fill="none"
               stroke="currentColor"
-              strokeWidth="3.5"
+              strokeWidth="3"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           </svg>
-          <p className="text-[#d4af37]/60 text-sm tracking-wider font-serif">
+          <p className="text-[#d4af37]/60 text-sm tracking-widest font-medium">
             VEDA
           </p>
         </div>
@@ -235,7 +119,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, sectionRefs }) => {
     );
   }
 
-  // ─── Dashboard view ─────────────────────────────────────────────────────────
+  // ── Dashboard view ───────────────────────────────────────────────────────────
   if (view === "dashboard" && user) {
     return (
       <>
@@ -260,10 +144,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, sectionRefs }) => {
     );
   }
 
-  // ─── Landing view ────────────────────────────────────────────────────────────
+  // ── Landing view ─────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen">
-      {/* Sticky Header */}
       <Header
         onNavigate={handleNavigate}
         onRequestDemo={() => setShowDemo(true)}
@@ -275,11 +158,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, sectionRefs }) => {
         onOpenDashboard={() => setView("dashboard")}
       />
 
-      {/* Landing page content */}
       <main>
         {children}
 
-        {/* If no children provided, render Pricing as a fallback section */}
         {!children && (
           <div className="pt-20">
             <Pricing
@@ -290,7 +171,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, sectionRefs }) => {
         )}
       </main>
 
-      {/* ─── Modals ─────────────────────────────────────────────────────────── */}
+      {/* ─── Modals ───────────────────────────────────────────────────────────── */}
       {showAuth && (
         <AuthModal
           isOpen={showAuth}

@@ -98,7 +98,12 @@ const Dashboard: React.FC<DashboardProps> = ({
     profile.subscription_plan !== "free" &&
     profile.subscription_plan !== "none";
 
-  const upcomingCalls = schedules.filter((s) => s.status === "scheduled");
+  const upcomingCalls = schedules.filter(
+    (s) => s.status === "scheduled" && !isSessionPast(s),
+  );
+  const pastScheduledCalls = schedules.filter(
+    (s) => s.status === "scheduled" && isSessionPast(s),
+  );
   const completedCalls = schedules.filter((s) => s.status === "completed");
 
   return (
@@ -287,6 +292,30 @@ const Dashboard: React.FC<DashboardProps> = ({
                     color="gold"
                   />
                 </div>
+                {pastScheduledCalls.length > 0 && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">⏰</span>
+                      <div>
+                        <p className="font-semibold text-amber-900 text-sm">
+                          {pastScheduledCalls.length} session window
+                          {pastScheduledCalls.length > 1 ? "s have" : " has"}{" "}
+                          elapsed
+                        </p>
+                        <p className="text-xs text-amber-700 mt-0.5">
+                          These sessions passed without a call. Schedule new
+                          ones if you still need them.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab("calls")}
+                      className="flex-shrink-0 text-xs font-bold text-amber-800 hover:underline"
+                    >
+                      View →
+                    </button>
+                  </div>
+                )}
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   {/* Plan info */}
@@ -478,6 +507,16 @@ const Dashboard: React.FC<DashboardProps> = ({
                         ))}
                       </>
                     )}
+                    {pastScheduledCalls.length > 0 && (
+                      <>
+                        <p className="text-xs font-bold text-amber-500/70 uppercase tracking-widest mt-4 mb-2">
+                          Past (window elapsed)
+                        </p>
+                        {pastScheduledCalls.map((s) => (
+                          <SessionCard key={s.id} session={s} isPast />
+                        ))}
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -492,7 +531,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                       Wisdom Recordings
                     </h2>
                     <p className="text-sm text-[#1a2332]/50 mt-0.5">
-                      Recordings are securely saved after each verified session.
+                      Each recording is securely saved after a verified session.
                     </p>
                   </div>
                 </div>
@@ -503,58 +542,9 @@ const Dashboard: React.FC<DashboardProps> = ({
                     desc="When you complete a call with your personal code, a recording entry will appear here."
                   />
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {recordings.map((rec) => (
-                      <div
-                        key={rec.id}
-                        className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-[#d4af37]/10 rounded-full flex items-center justify-center text-lg">
-                              🎙️
-                            </div>
-                            <div>
-                              <p className="font-medium text-[#1a2332]">
-                                {rec.session_title || "Wisdom Session"}
-                              </p>
-                              <p className="text-xs text-[#1a2332]/50 mt-0.5">
-                                {new Date(rec.created_at).toLocaleString(
-                                  "en-US",
-                                  {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  },
-                                )}
-                                {rec.duration_seconds
-                                  ? ` · ${Math.floor(rec.duration_seconds / 60)} min ${rec.duration_seconds % 60} sec`
-                                  : ""}
-                              </p>
-                            </div>
-                          </div>
-                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
-                            Saved
-                          </span>
-                        </div>
-                        <div className="mt-3 bg-[#f5f1e8] rounded-xl p-3">
-                          <p className="text-xs text-[#1a2332]/60">
-                            ✅ This session's recording has been securely stored
-                            in your Veda legacy archive. The AI has processed
-                            and indexed the wisdom shared.
-                          </p>
-                          {rec.call_code && (
-                            <p className="text-xs text-[#1a2332]/40 mt-1">
-                              Call code used:{" "}
-                              <span className="font-mono font-bold">
-                                {rec.call_code}
-                              </span>
-                            </p>
-                          )}
-                        </div>
-                      </div>
+                      <RecordingCard key={rec.id} rec={rec} />
                     ))}
                   </div>
                 )}
@@ -641,39 +631,62 @@ const StatCard: React.FC<{
   );
 };
 
-const SessionItem: React.FC<{ session: any }> = ({ session }) => (
-  <div className="bg-white rounded-xl px-4 py-3 border border-gray-100 flex items-center justify-between shadow-sm">
-    <div>
-      <p className="text-sm font-medium text-[#1a2332]">
-        {new Date(session.scheduled_date).toLocaleDateString("en-US", {
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-        })}
-      </p>
-      <p className="text-xs text-[#1a2332]/50">
-        {formatTime12(session.start_time)} – {formatTime12(session.end_time)}
-      </p>
+const SessionItem: React.FC<{ session: any }> = ({ session }) => {
+  const past = isSessionPast(session) && session.status === "scheduled";
+  return (
+    <div
+      className={`rounded-xl px-4 py-3 border flex items-center justify-between shadow-sm ${past ? "bg-gray-50 border-gray-200 opacity-60" : "bg-white border-gray-100"}`}
+    >
+      <div>
+        <p
+          className={`text-sm font-medium ${past ? "text-[#1a2332]/50 line-through" : "text-[#1a2332]"}`}
+        >
+          {new Date(session.scheduled_date).toLocaleDateString("en-US", {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+          })}
+        </p>
+        <p className="text-xs text-[#1a2332]/50">
+          {formatTime12(session.start_time)} – {formatTime12(session.end_time)}
+          {past && " · elapsed"}
+        </p>
+      </div>
+      <span
+        className={`font-mono text-xs font-bold px-2 py-1 rounded-lg ${past ? "text-[#1a2332]/30 bg-gray-100" : "text-[#d4af37] bg-[#d4af37]/10"}`}
+      >
+        {session.call_code}
+      </span>
     </div>
-    <span className="font-mono text-xs font-bold text-[#d4af37] bg-[#d4af37]/10 px-2 py-1 rounded-lg">
-      {session.call_code}
-    </span>
-  </div>
-);
+  );
+};
 
-const SessionCard: React.FC<{ session: any }> = ({ session }) => (
-  <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+const SessionCard: React.FC<{ session: any; isPast?: boolean }> = ({
+  session,
+  isPast = false,
+}) => (
+  <div
+    className={`rounded-2xl p-5 border shadow-sm ${isPast ? "bg-gray-50 border-gray-200 opacity-70" : "bg-white border-gray-100"}`}
+  >
     <div className="flex items-start justify-between mb-3">
       <div>
         <div className="flex items-center gap-2 mb-1">
           <span
-            className={`w-2 h-2 rounded-full ${session.status === "scheduled" ? "bg-amber-400" : "bg-green-500"}`}
+            className={`w-2 h-2 rounded-full ${
+              isPast
+                ? "bg-amber-400"
+                : session.status === "scheduled"
+                  ? "bg-amber-400"
+                  : "bg-green-500"
+            }`}
           />
           <span className="text-xs font-medium text-[#1a2332]/60 capitalize">
-            {session.status}
+            {isPast ? "window elapsed" : session.status}
           </span>
         </div>
-        <p className="font-medium text-[#1a2332]">
+        <p
+          className={`font-medium ${isPast ? "text-[#1a2332]/50 line-through" : "text-[#1a2332]"}`}
+        >
           {new Date(session.scheduled_date).toLocaleDateString("en-US", {
             weekday: "long",
             month: "long",
@@ -685,26 +698,42 @@ const SessionCard: React.FC<{ session: any }> = ({ session }) => (
           {formatTime12(session.start_time)} – {formatTime12(session.end_time)}
         </p>
       </div>
-      <span className="text-xs font-mono font-bold text-[#d4af37] bg-[#d4af37]/10 px-3 py-1.5 rounded-lg border border-[#d4af37]/20">
+      <span
+        className={`text-xs font-mono font-bold px-3 py-1.5 rounded-lg border ${
+          isPast
+            ? "text-[#1a2332]/30 bg-gray-100 border-gray-200"
+            : "text-[#d4af37] bg-[#d4af37]/10 border-[#d4af37]/20"
+        }`}
+      >
         {session.call_code}
       </span>
     </div>
-    <div className="bg-[#f5f1e8] rounded-xl p-3 flex items-center justify-between">
-      <div>
-        <p className="text-xs text-[#1a2332]/50 font-medium">
-          Dial this number during your window
-        </p>
-        <p className="font-mono font-bold text-[#1a2332]">
-          {session.phone_number || "+2342017001158"}
+    {!isPast && (
+      <div className="bg-[#f5f1e8] rounded-xl p-3 flex items-center justify-between">
+        <div>
+          <p className="text-xs text-[#1a2332]/50 font-medium">
+            Dial this number during your window
+          </p>
+          <p className="font-mono font-bold text-[#1a2332]">
+            {session.phone_number || "+2342017001158"}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-[#1a2332]/50 font-medium">Your PIN</p>
+          <p className="font-mono font-bold text-[#d4af37] text-lg">
+            {session.call_code}
+          </p>
+        </div>
+      </div>
+    )}
+    {isPast && (
+      <div className="bg-amber-50 rounded-xl p-3">
+        <p className="text-xs text-amber-700">
+          ⏰ This time window has passed. The call code above is no longer
+          valid. Schedule a new session to get a fresh one.
         </p>
       </div>
-      <div className="text-right">
-        <p className="text-xs text-[#1a2332]/50 font-medium">Your code</p>
-        <p className="font-mono font-bold text-[#d4af37] text-lg">
-          {session.call_code}
-        </p>
-      </div>
-    </div>
+    )}
   </div>
 );
 
@@ -729,6 +758,153 @@ const EmptyState: React.FC<{
     )}
   </div>
 );
+
+const RecordingCard: React.FC<{ rec: any }> = ({ rec }) => {
+  const [playing, setPlaying] = React.useState(false);
+  const [audioError, setAudioError] = React.useState(false);
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
+  const duration = rec.duration_seconds
+    ? `${Math.floor(rec.duration_seconds / 60)}:${String(rec.duration_seconds % 60).padStart(2, "0")}`
+    : null;
+
+  const handlePlay = () => {
+    if (!rec.recording_url) return;
+    if (!audioRef.current) {
+      const audio = new Audio(rec.recording_url);
+      audio.onended = () => setPlaying(false);
+      audio.onerror = () => {
+        setAudioError(true);
+        setPlaying(false);
+      };
+      audioRef.current = audio;
+    }
+    if (playing) {
+      audioRef.current.pause();
+      setPlaying(false);
+    } else {
+      audioRef.current.play().catch(() => setAudioError(true));
+      setPlaying(true);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* Header */}
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#d4af37]/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg
+                className="w-5 h-5 text-[#d4af37]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="font-medium text-[#1a2332] text-sm">
+                {rec.session_title || "Wisdom Session"}
+              </p>
+              <p className="text-xs text-[#1a2332]/50 mt-0.5">
+                {new Date(rec.created_at).toLocaleDateString("en-US", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+                {" · "}
+                {new Date(rec.created_at).toLocaleTimeString("en-US", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+                {duration && ` · ${duration}`}
+              </p>
+            </div>
+          </div>
+          <span className="flex-shrink-0 text-xs px-2.5 py-1 bg-green-100 text-green-700 rounded-full font-semibold">
+            ✓ Saved
+          </span>
+        </div>
+
+        {/* Audio player */}
+        {rec.recording_url && !audioError ? (
+          <div className="mt-4 bg-[#1a2332] rounded-xl px-4 py-3 flex items-center gap-3">
+            <button
+              onClick={handlePlay}
+              className="w-9 h-9 rounded-full bg-[#d4af37] flex items-center justify-center flex-shrink-0 hover:bg-[#e5c55a] transition-colors"
+            >
+              {playing ? (
+                <svg
+                  className="w-4 h-4 text-[#1a2332]"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <rect x="6" y="4" width="4" height="16" rx="1" />
+                  <rect x="14" y="4" width="4" height="16" rx="1" />
+                </svg>
+              ) : (
+                <svg
+                  className="w-4 h-4 text-[#1a2332] ml-0.5"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              )}
+            </button>
+            <div className="flex-1 min-w-0">
+              <div className="h-1 bg-white/10 rounded-full">
+                <div
+                  className={`h-full bg-[#d4af37] rounded-full transition-all ${playing ? "w-1/3 animate-pulse" : "w-0"}`}
+                />
+              </div>
+            </div>
+            <span className="text-xs text-white/40 flex-shrink-0">
+              {playing ? "Playing..." : duration || "Play"}
+            </span>
+          </div>
+        ) : (
+          <div className="mt-4 bg-[#f5f1e8] rounded-xl px-4 py-3">
+            <p className="text-xs text-[#1a2332]/50">
+              {audioError
+                ? "⚠️ Audio unavailable — recording is archived securely."
+                : "🎙️ Recording securely archived in your Veda legacy vault."}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Transcript */}
+      {rec.transcript && (
+        <div className="border-t border-gray-50 px-5 py-4">
+          <p className="text-xs font-semibold text-[#1a2332]/40 tracking-wide mb-2">
+            TRANSCRIPT
+          </p>
+          <p className="text-sm text-[#1a2332]/70 leading-relaxed line-clamp-4">
+            {rec.transcript}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Returns true if the session's end time has already passed
+function isSessionPast(s: any): boolean {
+  if (!s.scheduled_date) return false;
+  const endTime = s.end_time || s.start_time || "23:59";
+  const [year, month, day] = s.scheduled_date.split("-").map(Number);
+  const [hour, minute] = endTime.split(":").map(Number);
+  return new Date(year, month - 1, day, hour, minute) < new Date();
+}
 
 function formatTime12(t: string): string {
   if (!t) return "";

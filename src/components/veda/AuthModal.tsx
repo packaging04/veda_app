@@ -129,6 +129,37 @@ const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(true);
     setError("");
     try {
+      // ── Demo-gated signup: check if email is approved ────────────────────
+      const { data: demoReq } = await supabase
+        .from("demo_requests")
+        .select("status")
+        .eq("email", email.toLowerCase().trim())
+        .maybeSingle();
+
+      if (!demoReq) {
+        setError(
+          'Access is by invitation only. Please use the "Request a Demo" button to apply. We\'ll email you once approved.',
+        );
+        setLoading(false);
+        return;
+      }
+      if (demoReq.status === "pending") {
+        setError(
+          "Your request is still under review. We'll email you at this address once approved — usually within 24 hours.",
+        );
+        setLoading(false);
+        return;
+      }
+      if (demoReq.status === "rejected") {
+        setError(
+          "We weren't able to approve this request. Please contact us if you believe this is an error.",
+        );
+        setLoading(false);
+        return;
+      }
+      // status === "approved" → proceed with signup
+      // ─────────────────────────────────────────────────────────────────────
+
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
