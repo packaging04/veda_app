@@ -299,9 +299,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                       <div>
                         <p className="font-semibold text-amber-900 text-sm">
                           {pastScheduledCalls.length} session window
-                          {pastScheduledCalls.length > 1
-                            ? "s have"
-                            : " has"}{" "}
+                          {pastScheduledCalls.length > 1 ? "s have" : " has"}{" "}
                           elapsed
                         </p>
                         <p className="text-xs text-amber-700 mt-0.5">
