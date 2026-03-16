@@ -85,9 +85,11 @@ const ProfileCompletionModal: React.FC<ProfileCompletionModalProps> = ({
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      await supabase
-        .from("profiles")
-        .update({
+      // upsert instead of update — creates the row if it was deleted from the DB
+      // update() silently does nothing if the row doesn't exist; upsert() always writes
+      const { error } = await supabase.from("profiles").upsert(
+        {
+          id: userId,
           phone: phone || null,
           date_of_birth: dateOfBirth || null,
           occupation: occupation || null,
@@ -99,10 +101,17 @@ const ProfileCompletionModal: React.FC<ProfileCompletionModalProps> = ({
           profile_for_other: profileForOther,
           other_name: profileForOther ? otherName : null,
           other_relationship: profileForOther ? otherRelationship : null,
-        })
-        .eq("id", userId);
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" },
+      );
+
+      if (error) {
+        console.error("Profile upsert error:", error.message);
+      }
       onComplete();
-    } catch {
+    } catch (err) {
+      console.error("Profile save failed:", err);
       onComplete();
     } finally {
       setLoading(false);
